@@ -1,0 +1,1101 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Problemas de Distribuciones de Probabilidad (M2 - Clase 17)</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        svg: {
+          fontCache: 'global'
+        },
+        chtml: {
+          displayAlign: 'left'
+        }
+      };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #4f46e5; --primary-dark: #4338ca; --primary-light: #eef2ff;
+            --secondary-color: #64748b; --success-color: #10b981; --success-light: #ecfdf5;
+            --danger-color: #ef4444; --danger-light: #fef2f2; --warning-color: #f59e0b;
+            --light-bg: #f1f5f9; --border-color: #cbd5e1; --text-color: #1e293b;
+            --white: #ffffff; --progress-color-start: #4f46e5; --progress-color-end: #10b981;
+        }
+        @keyframes moveGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        body {
+            font-family: 'Inter', sans-serif; display: flex; justify-content: center;
+            align-items: flex-start; min-height: 100vh;
+            background: linear-gradient(-45deg, #6d28d9, #4f46e5, #d946ef, #10b981);
+            background-size: 400% 400%; animation: moveGradient 20s ease infinite;
+            margin: 0; padding: 2em 1em;
+        }
+        .main-wrapper { width: 100%; max-width: 900px; position: relative; }
+        .card { background: var(--white); padding: 2.5em; border-radius: 16px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15); animation: fadeIn 0.5s ease-out; }
+        .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDownFade { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #category-selection-screen h2 { font-size: 2em; color: var(--primary-color); text-align: center; margin-top: 0; margin-bottom: 0.5em; }
+        #category-selection-screen .subtitle { text-align: center; color: var(--secondary-color); margin-bottom: 2em; font-size: 1.1em; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+        #category-list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em; margin-bottom: 2.5em; }
+        .category-item { background-color: var(--white); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5em; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .category-item:hover:not(.completed) { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(79,70,229,0.1); border-color: var(--primary-color); }
+        .category-item h3 { margin: 0 0 0.5em 0; color: var(--primary-dark); font-size: 1.25em; }
+        .category-item p { margin: 0; color: var(--secondary-color); font-size: 0.95em; line-height: 1.5; }
+        .category-item.completed { border-color: var(--success-color); background-color: var(--success-light); cursor: default; }
+        .category-item.completed:hover { transform: none; box-shadow: none; }
+        .category-item.completed::before { content: '✔'; font-weight: bold; position: absolute; top: 1em; right: 1.2em; color: var(--success-color); font-size: 1.5em; }
+        .category-item .progress-info { margin-top: 1em; font-weight: bold; color: var(--success-color); }
+        #overall-progress-container { margin-top: 2em; text-align: center; border-top: 1px solid var(--border-color); padding-top: 2em;}
+        #overall-progress-container h3 { margin: 0 0 0.5em 0; color: var(--text-color); }
+        #overall-score { font-size: 1.2em; color: var(--secondary-color); }
+        #show-final-results-btn { padding: 12px 30px; font-size: 1em; font-weight: bold; color: var(--white); background-color: var(--success-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s; margin-top: 1em; }
+        #show-final-results-btn:hover { background-color: #059669; }
+
+        /* --- New Summary Card Styles --- */
+        #summary-container h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 0.2em; color: var(--primary-color); }
+        #summary-container .subtitle { color: var(--secondary-color); margin-top: 0; margin-bottom: 2em; }
+        .summary-section { margin-bottom: 2.5em; }
+        .summary-section h3 { font-size: 1.2em; font-weight: 700; color: var(--text-color); margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--primary-light); display: flex; align-items: center; gap: 0.75em; }
+        .summary-key-concepts { line-height: 1.7; color: #374151; }
+        .summary-key-concepts p, .summary-key-concepts ul, .summary-key-concepts ol { margin-bottom: 1em; }
+        .summary-key-concepts ul, .summary-key-concepts ol { padding-left: 20px; }
+        .summary-key-concepts strong { color: var(--primary-dark); }
+        .summary-key-concepts mjx-container[display="true"] { background-color: rgba(79, 70, 229, 0.05); padding: 1em; border-radius: 8px; margin: 1em 0; }
+        .summary-tips-list { list-style: none; padding: 0; }
+        .summary-tips-list li { display: flex; align-items: flex-start; gap: 1em; margin-bottom: 1em; background-color: var(--primary-light); padding: 1em; border-radius: 8px; }
+        .summary-tips-list li::before { content: '💡'; font-size: 1.2em; line-height: 1.5; }
+        #summary-continue-btn { padding: 12px 30px; font-size: 1em; font-weight: bold; color: var(--white); background-color: var(--primary-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; display: block; width: 100%; }
+        #summary-continue-btn:hover { background-color: var(--primary-dark); transform: scale(1.02); }
+
+        /* --- Main Quiz & Final Screen Styles --- */
+        #quiz-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
+        #problem-header { color: var(--text-color); font-weight: 600; font-size: 1.1em; }
+        #score-counter { color: var(--success-color); font-weight: 600; font-size: 1em; background-color: var(--success-light); padding: 5px 10px; border-radius: 8px; }
+        #progress-container { width: 100%; background-color: #e2e8f0; border-radius: 10px; margin-bottom: 1.5em; height: 12px; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--progress-color-start), var(--progress-color-end)); border-radius: 10px; transition: width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); }
+        #question-container { font-size: 1.15em; line-height: 1.7; margin: 1em 0; color: var(--text-color); text-align: justify; }
+        #question-container table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+        #question-container th, #question-container td { border: 1px solid var(--border-color); padding: 12px; text-align: center; }
+        #question-container th { background-color: var(--light-bg); font-weight: 600; }
+        #graph-container, .option-graph-canvas-container { width: 100%; max-width: 450px; margin: 1.5em auto; border-radius: 8px; overflow: hidden; }
+        #graph-container svg, #graph-container img, .option-graph-canvas-container svg, .option-graph-canvas-container img {max-width: 100%; height: auto; display: block; margin: 0 auto; background: white; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);}
+        #options-container { margin-top: 1.5em; display: flex; flex-direction: column; gap: 0.75em; }
+        .option-button { display: flex; align-items: center; gap: 1em; width: 100%; padding: 14px 18px; font-size: 1.05em; text-align: left; background-color: var(--white); border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option-button:hover:not(.disabled) { border-color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .option-button .label { font-weight: bold; color: var(--primary-color); }
+        .option-button .value { flex-grow: 1; }
+        .option-button.correct { border-color: var(--success-color); background-color: var(--success-light); }
+        .option-button.correct .label { color: var(--success-color); }
+        .option-button.incorrect { border-color: var(--danger-color); background-color: var(--danger-light); }
+        .option-button.incorrect .label { color: var(--danger-color); }
+        .option-button.disabled { cursor: not-allowed; }
+        .options-grid-with-graphs { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+        .option-block-graph { padding: 1em; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease-in-out; background-color: var(--white); }
+        .option-block-graph:hover:not(.disabled) { border-color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .option-block-graph.correct { border-color: var(--success-color)!important; background-color: var(--success-light); }
+        .option-block-graph.incorrect { border-color: var(--danger-color)!important; background-color: var(--danger-light); }
+        .option-block-graph .label { font-size: 1.2em; font-weight: bold; margin-bottom: 0.5em; color: var(--primary-color); }
+        
+        #hints-container { margin-top: 1.5em; border-top: 1px dashed var(--border-color); padding-top: 1.5em; display: flex; flex-direction: column; gap: 0.5em; }
+        .hint-button { width: 100%; padding: 10px; background-color: var(--primary-light); border: 1px solid var(--primary-color); color: var(--primary-dark); border-radius: 8px; cursor: pointer; transition: background-color 0.2s; font-weight: 500; }
+        .hint-button:hover { background-color: #dbeafe; }
+        .hint-button:disabled { background-color: #e5e7eb; border-color: var(--border-color); color: var(--secondary-color); cursor: not-allowed; }
+        .hint-content { padding: 12px; background-color: #f3f4f6; border-radius: 8px; font-size: 0.95em; color: var(--text-color); animation: fadeIn 0.3s; }
+
+        #feedback-container { margin-top: 1.5em; padding: 1.2em; border-radius: 12px; display: none; animation: slideDownFade 0.4s ease-out; line-height: 1.7; text-align: justify; }
+        #feedback-container.correct { background-color: var(--success-light); border-left: 5px solid var(--success-color); }
+        #feedback-container.incorrect { background-color: var(--danger-light); border-left: 5px solid var(--danger-color); }
+        #feedback-title { display: flex; align-items: center; font-size: 1.2em; font-weight: 700; margin-bottom: 0.5em; }
+        #feedback-title svg { width: 24px; height: 24px; margin-right: 8px; }
+        #feedback-container.correct #feedback-title { color: var(--success-color); }
+        #feedback-container.incorrect #feedback-title { color: var(--danger-color); }
+        #navigation-container { display: flex; justify-content: flex-end; margin-top: 2em; }
+        #next-button, .nav-btn { padding: 12px 30px; font-size: 1em; font-weight: bold; color: var(--white); background-color: var(--primary-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        #next-button { visibility: hidden; opacity: 0; }
+        #next-button.visible { visibility: visible; opacity: 1; }
+        #next-button:hover, .nav-btn:hover { background-color: var(--primary-dark); }
+        #final-screen { text-align: center; animation: fadeIn 0.5s ease-out; }
+        #final-screen h2 { font-size: 2.2em; color: var(--primary-color); font-weight: 700; }
+        #final-screen p { font-size: 1.2em; }
+        .highlight { color: var(--primary-color); font-weight: 700; }
+        @media (max-width: 680px) { .options-grid-with-graphs { grid-template-columns: 1fr; } #category-list { grid-template-columns: 1fr; }}
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div id="category-selection-screen" class="card">
+            <h2>Guía de Problemas de Distribuciones de Probabilidad (M2 - Clase 17)</h2>
+            <p class="subtitle">Selecciona un tema para comenzar. Cada sección se enfoca en una habilidad clave. ¡Completa todas las secciones para demostrar tu maestría!</p>
+            <ul id="category-list"></ul>
+            <div id="overall-progress-container" class="hidden">
+                <h3>Progreso General</h3>
+                <p id="overall-score"></p>
+                <button id="show-final-results-btn" class="nav-btn hidden">Ver Resumen Final</button>
+            </div>
+        </div>
+
+        <div id="quiz-wrapper" class="hidden">
+            <div id="summary-container" class="card hidden">
+                <h2 id="summary-title"></h2>
+                <p class="subtitle">Prepárate para la siguiente sección.</p>
+
+                <div class="summary-section">
+                    <h3>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-book-open" style="color: var(--primary-dark);"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                      Conceptos Clave y Fórmulas
+                    </h3>
+                    <div id="summary-key-concepts" class="summary-key-concepts"></div>
+                </div>
+                
+                <div class="summary-section">
+                    <h3>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap" style="color: var(--warning-color);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                      Consejos para esta Sección
+                    </h3>
+                    <ul id="summary-tips-list" class="summary-tips-list"></ul>
+                </div>
+                
+                <button id="summary-continue-btn">Comenzar Problemas</button>
+            </div>
+
+            <div id="quiz-container" class="hidden card">
+                <div id="progress-container"><div id="progress-bar"></div></div>
+                <div id="quiz-header-bar">
+                    <div id="problem-header"></div>
+                    <div id="score-counter"></div>
+                </div>
+                <div id="question-container"></div>
+                <div id="graph-container"></div>
+                <div id="options-container"></div>
+                <div id="hints-container"></div>
+                <div id="feedback-container"></div>
+                <div id="navigation-container"><button id="next-button">Siguiente →</button></div>
+            </div>
+
+            <div id="final-screen" class="hidden card">
+                <h2 id="final-title"></h2>
+                <p id="final-message"></p>
+                <p id="final-score" style="font-size: 2.5em; font-weight: bold; margin: 0.5em 0;"></p>
+                <p id="final-percentage" style="font-size: 1.5em;"></p>
+                <button id="back-to-menu-btn" class="nav-btn">Volver al Menú</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function renderMath() {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        setTimeout(() => window.MathJax.typesetPromise(), 0);
+      }
+    }
+
+    function renderDiagram(diagram) {
+        if (!diagram) return '';
+        if (diagram.type === 'raster') {
+            return `<img src="${diagram.src}" alt="Diagrama" style="max-width: 100%; height: auto; display: block; margin: 0 auto; background: white; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" />`;
+        }
+        return '';
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const icons = {
+            check: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>`,
+            x: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
+        };
+        const summaries = {
+  "ai-cat-1760927727480-0": {
+    "title": "Distribución Binomial - Fundamentos y Parámetros",
+    "key_concepts_html": "<p>En esta categoría, exploraremos la <strong>Distribución Binomial</strong>, una herramienta fundamental para modelar experimentos con un número fijo de ensayos independientes, cada uno con solo dos resultados posibles: éxito o fracaso.</p><ul><li><strong>Parámetros Clave:</strong><ul><li><strong><code>n</code></strong>: El número total de ensayos.</li><li><strong><code>k</code></strong>: El número de éxitos deseados.</li><li><strong><code>p</code></strong>: La probabilidad de éxito en un solo ensayo.</li><li><strong><code>q</code></strong>: La probabilidad de fracaso en un solo ensayo, donde siempre se cumple que <strong><code>q = 1 - p</code></strong>.</li></ul></li><li><strong>Fórmula de la Probabilidad Binomial:</strong> La probabilidad de obtener exactamente <code>k</code> éxitos en <code>n</code> ensayos está dada por:<span></span>\\[P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\]<span></span></li><li>El término <span>\\(\\binom{n}{k}\\)</span> es el <strong>coeficiente binomial</strong>, que representa el número de formas de elegir <code>k</code> éxitos de <code>n</code> ensayos, y se calcula como:<span></span>\\[\\binom{n}{k} = \\frac{n!}{k!(n-k)!}\\]<span></span></li><li>Un caso especial importante es cuando <strong><code>p = 0,5</code></strong>, la distribución binomial es <strong>simétrica</strong>, lo que implica que <span>\\(P(X=k) = P(X=n-k)\\)</span>.</li></ul><p>Comprender estos parámetros y la fórmula es esencial para identificar cuándo aplicar la distribución binomial y cómo calcular las probabilidades asociadas.</p>",
+    "tips": [
+      "Presta atención a los detalles en los enunciados y diagramas.",
+      "Recuerda revisar las fórmulas y conceptos clave relacionados antes de empezar.",
+      "Usa la explicación para entender tus errores y reforzar tu aprendizaje.",
+      "¡Mucha suerte en esta sección!"
+    ]
+  },
+  "ai-cat-1760927727480-1": {
+    "title": "Distribución Normal - Estandarización y Cálculo",
+    "key_concepts_html": "<p>Esta sección se centra en la <strong>Distribución Normal</strong>, una de las distribuciones de probabilidad más importantes, caracterizada por su forma de campana simétrica. Es fundamental para modelar muchos fenómenos naturales y sociales.</p><ul><li><strong>Parámetros Clave:</strong><ul><li><strong>\\(\\mu\\) (media):</strong> El centro de la distribución, donde se encuentra el valor más probable.</li><li><strong>\\(\\sigma\\) (desviación estándar):</strong> Una medida de la dispersión de los datos alrededor de la media.</li></ul></li><li><strong>Estandarización (Puntaje Z):</strong> Para calcular probabilidades con la distribución normal, a menudo se estandariza la variable aleatoria \\(X\\) a una <strong>Distribución Normal Estándar</strong> (con \\(\\mu = 0\\) y \\(\\sigma = 1\\)) utilizando el <strong>puntaje Z</strong>:<span></span>\\[Z = \\frac{X - \\mu}{\\sigma}\\]<span></span>El puntaje Z indica cuántas desviaciones estándar un valor \\(X\\) está por encima o por debajo de la media.</li><li><strong>Cálculo de Probabilidades:</strong> Una vez obtenido el puntaje Z, se utiliza una tabla de distribución normal estándar (Tabla Z) o software estadístico para encontrar las probabilidades asociadas.<ul><li><strong>Probabilidad acumulada:</strong> \\(P(X < x)\\) es equivalente a \\(P(Z < z)\\).</li><li><strong>Probabilidad de \"mayor que\":</strong> \\(P(X > x) = 1 - P(X < x)\\).</li><li><strong>Probabilidad en un intervalo:</strong> \\(P(a < X < b) = P(X < b) - P(X < a)\\).</li></ul></li><li><strong>Regla Empírica:</strong> Para distribuciones normales, aproximadamente el 68% de los datos caen dentro de \\(\\mu \\pm 1\\sigma\\), el 95% dentro de \\(\\mu \\pm 2\\sigma\\) y el 99.7% dentro de \\(\\mu \\pm 3\\sigma\\).</li></ul><p>Dominar la estandarización y el uso de la tabla Z es crucial para resolver problemas de probabilidad con la distribución normal.</p>",
+    "tips": [
+      "Presta atención a los detalles en los enunciados y diagramas.",
+      "Recuerda revisar las fórmulas y conceptos clave relacionados antes de empezar.",
+      "Usa la explicación para entender tus errores y reforzar tu aprendizaje.",
+      "¡Mucha suerte en esta sección!"
+    ]
+  },
+  "ai-cat-1760927727480-2": {
+    "title": "Aplicación de la Distribución Binomial",
+    "key_concepts_html": "<p>Esta categoría aplica los fundamentos de la <strong>Distribución Binomial</strong> para resolver problemas prácticos. Aquí consolidaremos la habilidad de identificar correctamente los parámetros \\(n\\) y \\(p\\), y utilizaremos la fórmula de probabilidad para calcular la probabilidad de un número específico de éxitos.</p><ul><li><strong>Identificación de un Escenario Binomial:</strong> Asegúrate de que el problema cumpla con las siguientes características:<ul><li>Un número fijo de ensayos (\\(n\\)).</li><li>Cada ensayo es independiente de los demás.</li><li>Solo dos resultados posibles por ensayo (éxito o fracaso).</li><li>La probabilidad de éxito (\\(p\\)) es constante para cada ensayo.</li></ul></li><li><strong>Fórmula de Probabilidad:</strong> Recuerda y aplica correctamente la fórmula para calcular la probabilidad de obtener exactamente \\(k\\) éxitos:<span></span>\\[P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\]<span></span></li><li><strong>Cálculo del Coeficiente Binomial:</strong> No olvides que \\(\\binom{n}{k} = \\frac{n!}{k!(n-k)!}\\).</li><li><strong>Casos Especiales:</strong> Si \\(p=0,5\\), la fórmula se simplifica a \\(P(X=k) = \\binom{n}{k} \\cdot (0,5)^n\\).</li><li><strong>Cálculos Numéricos:</strong> Para obtener resultados finales, es esencial realizar los cálculos aritméticos con precisión, incluyendo el coeficiente binomial y las potencias de \\(p\\) y \\(q\\).</li></ul><p>La práctica en esta sección te permitirá aplicar la teoría a situaciones concretas y obtener las probabilidades requeridas.</p>",
+    "tips": [
+      "Presta atención a los detalles en los enunciados y diagramas.",
+      "Recuerda revisar las fórmulas y conceptos clave relacionados antes de empezar.",
+      "Usa la explicación para entender tus errores y reforzar tu aprendizaje.",
+      "¡Mucha suerte en esta sección!"
+    ]
+  },
+  "ai-cat-1760927727480-3": {
+    "title": "Interpretación de Distribuciones",
+    "key_concepts_html": "<p>Esta categoría evalúa tu capacidad para interpretar la información proporcionada por las <strong>distribuciones de probabilidad</strong>, tanto a partir de tablas como de las propiedades inherentes a las distribuciones binomial y normal.</p><ul><li><strong>Simetría de la Distribución Binomial:</strong> Cuando la probabilidad de éxito \\(p = 0,5\\), la distribución binomial es perfectamente simétrica. Esto implica que la probabilidad de \\(k\\) éxitos es igual a la probabilidad de \\(n-k\\) éxitos, es decir, \\(P(X=k) = P(X=n-k)\\). Además, tener \\(k\\) éxitos es equivalente a tener \\(n-k\\) fracasos.</li><li><strong>Espacio Muestral y Suma de Probabilidades:</strong> La suma de las probabilidades de todos los resultados posibles en el espacio muestral de cualquier variable aleatoria discreta siempre debe ser 1. Por ejemplo, si \\(X\\) puede tomar valores de 0 a \\(n\\), entonces \\(P(X \\ge 0) = \\sum_{i=0}^{n} P(X=i) = 1\\).</li><li><strong>Probabilidades Acumuladas:</strong> La probabilidad de que \\(X\\) sea menor o igual a un valor \\(k\\) (\\(P(X \\le k)\\)) se calcula sumando las probabilidades individuales de \\(X=0, X=1, \\ldots, X=k\\).</li><li><strong>Interpretación de Rangos:</strong> Cuando se solicita la probabilidad de un rango de valores (ej. \"de \\(a\\) a \\(b\\)\" o \"entre \\(a\\) y \\(b\\)\"), se deben sumar las probabilidades de cada valor discreto dentro de ese rango, o usar la diferencia de probabilidades acumuladas para distribuciones continuas.</li></ul><p>Desarrollar una fuerte intuición sobre estas propiedades te permitirá verificar la coherencia de tus cálculos y comprender mejor el significado de los resultados probabilísticos.</p>",
+    "tips": [
+      "Presta atención a los detalles en los enunciados y diagramas.",
+      "Recuerda revisar las fórmulas y conceptos clave relacionados antes de empezar.",
+      "Usa la explicación para entender tus errores y reforzar tu aprendizaje.",
+      "¡Mucha suerte en esta sección!"
+    ]
+  }
+};
+        const allProblemsData = [
+  {
+    "text": "La función de probabilidad de una distribución binomial es: \\(P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\). ¿Cuál de las siguientes afirmaciones es correcta?",
+    "options": [
+      {
+        "text": "n + k = 1"
+      },
+      {
+        "text": "k corresponde al total de la muestra."
+      },
+      {
+        "text": "P(X = 0) = 1."
+      },
+      {
+        "text": "p + q = 1."
+      },
+      {
+        "text": "\\(\\binom{n}{3}\\) representa que existen hasta 3 éxitos."
+      }
+    ],
+    "correct": 3,
+    "explanation": "En un experimento de Bernoulli, que es la base de la distribución binomial, solo hay dos resultados posibles: éxito con probabilidad \\(p\\) y fracaso con probabilidad \\(q\\). La suma de las probabilidades de todos los resultados posibles en un ensayo siempre debe ser 1, por lo tanto, \\(p + q = 1\\).",
+    "hints": [
+      "¿Qué representan \\(p\\) y \\(q\\) en el contexto de un solo ensayo en la distribución binomial?",
+      "¿Cuál es la regla fundamental para la suma de las probabilidades de todos los resultados posibles en cualquier experimento de probabilidad?",
+      "Si un evento puede tener dos resultados mutuamente excluyentes y exhaustivos, como éxito o fracaso, ¿cómo se relacionan sus probabilidades?"
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "1",
+    "internalId": "q-1760927727480-0.407953826091088",
+    "id": "q-ai-cat-1760927727480-0-0"
+  },
+  {
+    "text": "En el siguiente problema: \"En una fábrica de cámaras el 5% sale con defectos. Determina la probabilidad de que en una muestra de 12 se encuentren 2 cámaras defectuosas.\", los parámetros de la distribución binomial son:",
+    "options": [
+      {
+        "text": "n = 0,05; p = 12"
+      },
+      {
+        "text": "n = 12; q = 12"
+      },
+      {
+        "text": "n = 12; p = 0,95"
+      },
+      {
+        "text": "p = 0,05; q = 2"
+      },
+      {
+        "text": "n = 12; p = 0,05"
+      }
+    ],
+    "correct": 4,
+    "explanation": "Los parámetros de la distribución binomial son \\(n\\) (el número total de ensayos o tamaño de la muestra) y \\(p\\) (la probabilidad de éxito en un solo ensayo). En este problema, el tamaño de la muestra es 12 cámaras (\\(n = 12\\)) y la probabilidad de que una cámara sea defectuosa (el \"éxito\") es del 5%, que se expresa como \\(p = 0,05\\).",
+    "hints": [
+      "¿Qué representa el parámetro \\(n\\) en una distribución binomial?",
+      "¿Qué representa el parámetro \\(p\\) en una distribución binomial?",
+      "Identifica el tamaño total de la muestra y la probabilidad de que el evento de interés ocurra en una única observación."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "6",
+    "internalId": "q-1760927727480-0.08540452858901026",
+    "id": "q-ai-cat-1760927727480-0-1"
+  },
+  {
+    "text": "Se lanza siete veces un dado equilibrado de seis caras. Considere la variable aleatoria \\(X\\) como la cantidad de veces que se obtiene un número superior a 4. Si \\(X \\sim B(n, p)\\) ¿cuáles son los valores de \\(n\\) y \\(p\\), respectivamente?",
+    "options": [
+      {
+        "text": "6 y 1/3"
+      },
+      {
+        "text": "6 y 1/6"
+      },
+      {
+        "text": "7 y 1/3"
+      },
+      {
+        "text": "7 y 1/2"
+      }
+    ],
+    "correct": 2,
+    "explanation": "El parámetro \\(n\\) es el número de veces que se repite el experimento, que en este caso es 7 lanzamientos. El parámetro \\(p\\) es la probabilidad de éxito en un solo ensayo. Un número superior a 4 en un dado de seis caras significa obtener un 5 o un 6. Hay 2 resultados favorables de un total de 6, por lo que \\(p = 2/6 = 1/3\\).",
+    "hints": [
+      "¿Qué indica el número de repeticiones de un experimento en los parámetros de la distribución binomial?",
+      "¿Cuál es el evento \"éxito\" en este problema y cuáles son los posibles resultados de un dado que cumplen con esa condición?",
+      "Para un dado de seis caras, ¿cuántos resultados hay en total y cuántos de ellos son un número superior a 4? Calcula la proporción."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "18",
+    "internalId": "q-1760927727480-0.9451059522607138",
+    "id": "q-ai-cat-1760927727480-0-2"
+  },
+  {
+    "text": "Dado un experimento binomial de parámetros \\(n = 5\\) y \\(p = 0,7\\), ¿qué expresión permite calcular la probabilidad de 2 éxitos?",
+    "options": [
+      {
+        "text": "\\(\\binom{5}{2} \\cdot (0,7)^3 \\cdot (0,3)^2\\)"
+      },
+      {
+        "text": "\\(\\binom{5}{2} \\cdot (0,7)^2 \\cdot (0,3)^3\\)"
+      },
+      {
+        "text": "\\(\\binom{5}{2} \\cdot 0,7 \\cdot 0,3\\)"
+      },
+      {
+        "text": "\\(\\binom{5}{2} \\cdot (0,7)^3 \\cdot (0,3)^2\\)"
+      }
+    ],
+    "correct": 1,
+    "explanation": "La fórmula de la probabilidad binomial es \\(P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\). Con \\(n = 5\\), \\(p = 0,7\\) y \\(k = 2\\), necesitamos calcular \\(q = 1 - p = 1 - 0,7 = 0,3\\) y \\(n - k = 5 - 2 = 3\\). Sustituyendo estos valores en la fórmula, obtenemos \\(P(X = 2) = \\binom{5}{2} \\cdot (0,7)^2 \\cdot (0,3)^3\\).",
+    "hints": [
+      "¿Puedes recordar la fórmula general para calcular la probabilidad en una distribución binomial, \\(P(X = k)\\)?",
+      "Identifica claramente los valores de \\(n\\), \\(k\\), y \\(p\\) dados en el problema. Luego, ¿cómo calculas \\(q\\) y el exponente de \\(q\\)?",
+      "Asegúrate de que el exponente de \\(p\\) sea \\(k\\) y el exponente de \\(q\\) sea \\(n-k\\) en la fórmula."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "19",
+    "internalId": "q-1760927727480-0.9699516435036235",
+    "id": "q-ai-cat-1760927727480-0-3"
+  },
+  {
+    "text": "La estatura de los estudiantes de una universidad se distribuye normalmente con media \\(\\mu = 172\\,\\text{cm}\\) y desviación estándar \\(\\sigma = 6\\,\\text{cm}\\). ¿Cuál es la probabilidad de que un estudiante mida menos de \\(168\\,\\text{cm}\\)?",
+    "options": [
+      {
+        "text": "0,2514"
+      },
+      {
+        "text": "0,7486"
+      },
+      {
+        "text": "0,2486"
+      },
+      {
+        "text": "0,7514"
+      }
+    ],
+    "correct": 0,
+    "explanation": "Para calcular esta probabilidad, primero se estandariza el valor de \\(X = 168\\,\\text{cm}\\) a un puntaje Z usando la fórmula \\(Z = (X - \\mu) / \\sigma\\). Así, \\(Z = (168 - 172) / 6 = -4 / 6 \\approx -0,67\\). Luego, se busca en una tabla de distribución normal estándar la probabilidad \\(P(Z < -0,67)\\), que es aproximadamente \\(0,2514\\).",
+    "hints": [
+      "¿Cuál es el primer paso fundamental para calcular probabilidades con una distribución normal cuando se te da un valor \\(X\\)?",
+      "¿Qué fórmula utilizas para convertir un valor de la distribución normal a un puntaje Z?",
+      "Calcula el valor de Z para \\(X = 168\\,\\text{cm}\\) usando \\(\\mu = 172\\,\\text{cm}\\) y \\(\\sigma = 6\\,\\text{cm}\\)."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "5",
+    "internalId": "q-1760927727480-0.3693379890816736",
+    "id": "q-ai-cat-1760927727480-1-0"
+  },
+  {
+    "text": "El peso de los paquetes entregados por una empresa de envíos tiene distribución normal con media \\(5,4\\,\\text{kg}\\) y desviación estándar \\(0,8\\,\\text{kg}\\). ¿Cuál es la probabilidad de que un paquete pese más de \\(6,2\\,\\text{kg}\\)?",
+    "options": [
+      {
+        "text": "0,3413"
+      },
+      {
+        "text": "0,3587"
+      },
+      {
+        "text": "0,8413"
+      },
+      {
+        "text": "0,1587"
+      }
+    ],
+    "correct": 3,
+    "explanation": "Primero, estandarizamos \\(X = 6,2\\,\\text{kg}\\) a un puntaje Z: \\(Z = (6,2 - 5,4) / 0,8 = 0,8 / 0,8 = 1\\). Se pide la probabilidad de que el paquete pese más de \\(6,2\\,\\text{kg}\\), es decir, \\(P(X > 6,2)\\) o \\(P(Z > 1)\\). Como las tablas Z suelen dar \\(P(Z < z)\\), usamos el complemento: \\(P(Z > 1) = 1 - P(Z < 1)\\). De la tabla, \\(P(Z < 1) \\approx 0,8413\\), por lo tanto, \\(P(Z > 1) = 1 - 0,8413 = 0,1587\\).",
+    "hints": [
+      "¿Cómo se convierte un valor \\(X\\) de una distribución normal a un puntaje \\(Z\\)?",
+      "Si buscas la probabilidad de que \\(X\\) sea 'mayor que' un cierto valor, ¿cómo se relaciona esto con la probabilidad acumulada que usualmente se encuentra en una tabla Z?",
+      "Calcula el valor de Z para \\(X = 6,2\\,\\text{kg}\\) y luego usa la propiedad del complemento para encontrar la probabilidad deseada."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "7",
+    "internalId": "q-1760927727480-0.5667310409503008",
+    "id": "q-ai-cat-1760927727480-1-1"
+  },
+  {
+    "text": "El tiempo (en minutos) que un alumno tarda en resolver una prueba sigue una distribución normal con media \\(90\\) y desviación estándar \\(10\\). ¿Cuál es la probabilidad de que un alumno termine la prueba entre \\(80\\) y \\(100\\) minutos?",
+    "options": [
+      {
+        "text": "0,8413"
+      },
+      {
+        "text": "0,1587"
+      },
+      {
+        "text": "0,6826"
+      },
+      {
+        "text": "0,3174"
+      }
+    ],
+    "correct": 2,
+    "explanation": "Para encontrar \\(P(80 < X < 100)\\), primero estandarizamos ambos límites. Para \\(X_1 = 80\\), \\(Z_1 = (80 - 90) / 10 = -1\\). Para \\(X_2 = 100\\), \\(Z_2 = (100 - 90) / 10 = 1\\). Así, se busca \\(P(-1 < Z < 1)\\). Esto se calcula como \\(P(Z < 1) - P(Z < -1)\\). De las tablas, \\(P(Z < 1) \\approx 0,8413\\) y \\(P(Z < -1) \\approx 0,1587\\). Por lo tanto, \\(P(-1 < Z < 1) = 0,8413 - 0,1587 = 0,6826\\). Este resultado es consistente con la regla empírica, donde el \\(68,26\\%\\) de los datos caen dentro de \\(\\mu \\pm 1\\sigma\\).",
+    "hints": [
+      "Cuando se busca la probabilidad de un intervalo \\((a < X < b)\\) en una distribución normal, ¿cuál es el primer paso para ambos límites?",
+      "¿Cómo se combinan las probabilidades acumuladas \\(P(Z < z_2)\\) y \\(P(Z < z_1)\\) para obtener la probabilidad en el intervalo \\((z_1 < Z < z_2)\\)?",
+      "Calcula los puntajes Z para \\(X = 80\\) y \\(X = 100\\). Luego, utiliza la diferencia de las probabilidades acumuladas."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "12",
+    "internalId": "q-1760927727480-0.8490036096703819",
+    "id": "q-ai-cat-1760927727480-1-2"
+  },
+  {
+    "text": "El tiempo que tarda un técnico en reparar un equipo sigue una distribución normal con media \\(90\\) minutos y desviación estándar \\(15\\) minutos. ¿Qué probabilidad hay de que una reparación dure más de \\(120\\) minutos?",
+    "options": [
+      {
+        "text": "0,4772"
+      },
+      {
+        "text": "0,9778"
+      },
+      {
+        "text": "0,0228"
+      },
+      {
+        "text": "0,5222"
+      }
+    ],
+    "correct": 2,
+    "explanation": "Para determinar \\(P(X > 120)\\), primero estandarizamos \\(X = 120\\) a un puntaje Z: \\(Z = (120 - 90) / 15 = 30 / 15 = 2\\). Buscamos \\(P(Z > 2)\\). Utilizando una tabla Z, encontramos que \\(P(Z < 2) \\approx 0,9772\\). Por lo tanto, \\(P(Z > 2) = 1 - P(Z < 2) = 1 - 0,9772 = 0,0228\\). Este valor es una de las \"colas\" de la distribución, correspondiente al \\(2,28\\%\\) de la regla empírica \\(\\mu \\pm 2\\sigma\\).",
+    "hints": [
+      "¿Qué transformación se debe realizar a \\(X = 120\\) para poder usar una tabla de distribución normal estándar?",
+      "¿Cómo se interpreta un puntaje Z positivo y qué significa buscar una probabilidad \"mayor que\" ese puntaje Z?",
+      "Calcula el puntaje Z para \\(X = 120\\) y luego determina la probabilidad \\(P(Z > z)\\) utilizando la tabla Z y la propiedad del complemento."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "22",
+    "internalId": "q-1760927727480-0.8050279374430747",
+    "id": "q-ai-cat-1760927727480-1-3"
+  },
+  {
+    "text": "Se investiga el número de piezas defectuosas que existe en un lote de 6 elementos... con \\(p = 0,1\\)... ¿cuál es la probabilidad de que haya exactamente 2 piezas defectuosas?",
+    "options": [
+      {
+        "text": "\\(\\binom{6}{2} \\cdot 0,1^2\\)"
+      },
+      {
+        "text": "\\(\\binom{6}{2} \\cdot 0,1 \\cdot 0,9\\)"
+      },
+      {
+        "text": "\\(\\binom{6}{2} \\cdot 0,1^2 \\cdot 0,9^4\\)"
+      },
+      {
+        "text": "\\(\\binom{6}{2} \\cdot 0,1^4 \\cdot 0,9^2\\)"
+      }
+    ],
+    "correct": 2,
+    "explanation": "La fórmula de la probabilidad binomial es \\(P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\). En este problema, \\(n = 6\\) (lote de elementos), \\(k = 2\\) (piezas defectuosas), y \\(p = 0,1\\). De esto, se deduce que \\(q = 1 - p = 1 - 0,1 = 0,9\\). El exponente de \\(q\\) es \\(n - k = 6 - 2 = 4\\). Sustituyendo en la fórmula, obtenemos \\(P(X = 2) = \\binom{6}{2} \\cdot (0,1)^2 \\cdot (0,9)^4\\).",
+    "hints": [
+      "¿Cuál es la fórmula general de la probabilidad binomial, \\(P(X = k)\\)?",
+      "Identifica los valores de \\(n\\) (número total de ensayos), \\(k\\) (número de éxitos), \\(p\\) (probabilidad de éxito) y \\(q\\) (probabilidad de fracaso) a partir del enunciado.",
+      "Asegúrate de que el exponente de \\(p\\) sea \\(k\\) y el exponente de \\(q\\) sea \\(n-k\\) al construir la expresión."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "3",
+    "internalId": "q-1760927727480-0.4897893557176546",
+    "id": "q-ai-cat-1760927727480-2-0"
+  },
+  {
+    "text": "Cuando se estudia el sexo de los descendientes en las familias con diez hijos... \\(X\\) sigue la distribución \\(B(10; 0,5)\\), entonces ¿cuál es la probabilidad de que haya exactamente 3 varones?",
+    "options": [
+      {
+        "text": "\\(\\binom{10}{3} \\cdot 0,5^3\\)"
+      },
+      {
+        "text": "\\(\\binom{10}{3} \\cdot 0,5^{10}\\)"
+      },
+      {
+        "text": "\\(\\binom{10}{3} \\cdot 0,5^3 \\cdot 7\\)"
+      },
+      {
+        "text": "\\(0,5^{10}\\)"
+      }
+    ],
+    "correct": 1,
+    "explanation": "Para una distribución binomial \\(B(n, p)\\) con \\(n = 10\\) y \\(p = 0,5\\), y buscando \\(k = 3\\) éxitos, la probabilidad es \\(P(X = 3) = \\binom{10}{3} \\cdot p^3 \\cdot q^{10-3}\\). Dado que \\(p = 0,5\\), entonces \\(q = 1 - p = 0,5\\). Sustituyendo, obtenemos \\(P(X = 3) = \\binom{10}{3} \\cdot (0,5)^3 \\cdot (0,5)^7\\). Por las propiedades de los exponentes, \\((0,5)^3 \\cdot (0,5)^7 = (0,5)^{3+7} = (0,5)^{10}\\). Así, la expresión es \\(\\binom{10}{3} \\cdot 0,5^{10}\\).",
+    "hints": [
+      "¿Cuál es la fórmula general de la probabilidad binomial para \\(P(X = k)\\)?",
+      "Identifica los valores de \\(n\\), \\(k\\), \\(p\\) y \\(q\\) a partir de \\(B(10; 0,5)\\) y el número de varones buscado.",
+      "Si \\(p = 0,5\\), ¿cómo se pueden combinar las potencias de \\(p\\) y \\(q\\) en la fórmula binomial?"
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "4",
+    "internalId": "q-1760927727480-0.8547436690232741",
+    "id": "q-ai-cat-1760927727480-2-1"
+  },
+  {
+    "text": "La última novela de un autor ha tenido un gran éxito, hasta el punto de que el 80% de lectores menores de 30 años ya la han leído. Si se escoge un grupo de 4 amigos entre estos lectores, ¿cuál es la probabilidad de que en ese grupo hayan leído la novela 2 personas?",
+    "options": [
+      {
+        "text": "0,3214"
+      },
+      {
+        "text": "0,1536"
+      },
+      {
+        "text": "0,2423"
+      },
+      {
+        "text": "0,7125"
+      },
+      {
+        "text": "0,1322"
+      }
+    ],
+    "correct": 1,
+    "explanation": "Este es un problema de distribución binomial con \\(n = 4\\) (grupo de amigos), \\(p = 0,8\\) (probabilidad de haber leído la novela) y \\(k = 2\\) (personas que leyeron la novela). La probabilidad de fracaso es \\(q = 1 - 0,8 = 0,2\\). Aplicando la fórmula \\(P(X=k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\): \\(P(X=2) = \\binom{4}{2} \\cdot (0,8)^2 \\cdot (0,2)^{4-2}\\). Calculando: \\(\\binom{4}{2} = 6\\), \\((0,8)^2 = 0,64\\), \\((0,2)^2 = 0,04\\). Entonces, \\(P(X=2) = 6 \\cdot 0,64 \\cdot 0,04 = 0,1536\\).",
+    "hints": [
+      "¿Qué valores corresponden a \\(n\\) (número total de amigos), \\(k\\) (número de éxitos), \\(p\\) (probabilidad de éxito) y \\(q\\) (probabilidad de fracaso) en este problema?",
+      "Escribe la fórmula de la probabilidad binomial con los valores identificados, incluyendo el cálculo de \\(\\binom{n}{k}\\).",
+      "Calcula el coeficiente binomial y las potencias de \\(p\\) y \\(q\\), luego multiplica todos los términos para obtener el resultado final."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "14",
+    "internalId": "q-1760927727480-0.7187853866328991",
+    "id": "q-ai-cat-1760927727480-2-2"
+  },
+  {
+    "text": "Se dice que el 50% de los accidentes ocurridos en una empresa se atribuyen a errores humanos. Si en un período ocurren 4 accidentes, ¿cuál es la probabilidad de que dos de ellos se atribuyan a errores humanos?",
+    "options": [
+      {
+        "text": "0,5"
+      },
+      {
+        "text": "0,25"
+      },
+      {
+        "text": "0,75"
+      },
+      {
+        "text": "0,125"
+      },
+      {
+        "text": "0,375"
+      }
+    ],
+    "correct": 4,
+    "explanation": "Este es un problema binomial con \\(n = 4\\) (número de accidentes), \\(p = 0,5\\) (probabilidad de error humano) y \\(k = 2\\) (accidentes por error humano). La probabilidad de fracaso es \\(q = 1 - 0,5 = 0,5\\). Usando la fórmula \\(P(X=k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\): \\(P(X=2) = \\binom{4}{2} \\cdot (0,5)^2 \\cdot (0,5)^{4-2}\\). Calculando: \\(\\binom{4}{2} = 6\\), y \\((0,5)^2 \\cdot (0,5)^2 = (0,5)^4 = 0,0625\\). Entonces, \\(P(X=2) = 6 \\cdot 0,0625 = 0,375\\).",
+    "hints": [
+      "¿Cuáles son los valores de \\(n\\), \\(k\\), \\(p\\) y \\(q\\) en este escenario?",
+      "Escribe la fórmula binomial para \\(P(X=2)\\) con los parámetros dados. Recuerda que si \\(p=0,5\\), entonces \\(q\\) también es \\(0,5\\).",
+      "Calcula el coeficiente binomial \\(\\binom{4}{2}\\) y luego las potencias de \\(0,5\\), y multiplica los resultados."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "21",
+    "internalId": "q-1760927727480-0.29133364582016685",
+    "id": "q-ai-cat-1760927727480-2-3"
+  },
+  {
+    "text": "Una variable aleatoria \\(X\\) tiene una distribución binomial con los siguientes parámetros, \\(n = 15\\) y \\(p = 0,5\\); entonces, ¿cuál de las siguientes afirmaciones es falsa?",
+    "options": [
+      {
+        "text": "La probabilidad que hayan exactamente 3 éxitos es igual a la probabilidad que hayan 12 fracasos."
+      },
+      {
+        "text": "La probabilidad que hayan 3 éxitos es igual a la probabilidad de que hayan 12 éxitos."
+      },
+      {
+        "text": "La probabilidad que hayan al menos 4 éxitos es igual a la probabilidad que como máximo existan 4 fracasos."
+      },
+      {
+        "text": "La probabilidad que hayan exactamente 2 éxitos es igual a \\(105 \\cdot 0,5^{15}\\)"
+      }
+    ],
+    "correct": 2,
+    "explanation": "Analicemos cada opción: A) 12 fracasos significan \\(15-12=3\\) éxitos. \\(P(X=3) = P(3 \\text{ éxitos})\\) y \\(P(12 \\text{ fracasos}) = P(3 \\text{ éxitos})\\). Verdadera. B) Dada la simetría con \\(p=0,5\\), \\(P(X=k) = P(X=n-k)\\). Así, \\(P(X=3) = P(X=15-3) = P(X=12)\\). Verdadera. C) \\(P(\\text{al menos 4 éxitos}) = P(X \\ge 4)\\). \\(P(\\text{máximo 4 fracasos}) = P(0,1,2,3 \\text{ o } 4 \\text{ fracasos})\\). Esto equivale a \\(P(15,14,13,12 \\text{ o } 11 \\text{ éxitos}) = P(X \\ge 11)\\). Claramente, \\(P(X \\ge 4) \\ne P(X \\ge 11)\\). Falsa. D) \\(P(X=2) = \\binom{15}{2} (0,5)^2 (0,5)^{13} = \\binom{15}{2} (0,5)^{15}\\). \\(\\binom{15}{2} = (15 \\cdot 14)/2 = 105\\). Entonces, \\(P(X=2) = 105 \\cdot 0,5^{15}\\). Verdadera. Por lo tanto, la afirmación C es falsa.",
+    "hints": [
+      "¿Qué propiedad especial tiene la distribución binomial cuando la probabilidad de éxito \\(p\\) es \\(0,5\\)?",
+      "Recuerda que tener \\(k\\) éxitos es equivalente a tener \\(n-k\\) fracasos. ¿Cómo puedes reescribir cada afirmación en términos de \"éxitos\"?",
+      "Traduce \"al menos 4 éxitos\" a una desigualdad y \"como máximo 4 fracasos\" a una desigualdad sobre el número de éxitos. Luego, compara las dos expresiones de probabilidad."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "9",
+    "internalId": "q-1760927727480-0.16231588729986834",
+    "id": "q-ai-cat-1760927727480-3-0"
+  },
+  {
+    "text": "La probabilidad de que Catalina convierta un gol en un tiro penal es de \\(0,6\\). Se define la variable aleatoria \\(X\\) como la cantidad de goles convertidos en tres lanzamientos, ¿cuál de las siguientes afirmaciones es verdadera?",
+    "options": [
+      {
+        "text": "P(X = 0) = P(X = 3)"
+      },
+      {
+        "text": "P(X = 1) = P(X = 2)"
+      },
+      {
+        "text": "P(X \\ge 0) = 1"
+      },
+      {
+        "text": "P(X = 1) = \\(\\binom{3}{1} \\cdot 0,6 \\cdot 0,4\\)"
+      }
+    ],
+    "correct": 2,
+    "explanation": "Analicemos las opciones: A) \\(P(X=0) = \\binom{3}{0}(0,6)^0(0,4)^3 = 0,064\\). \\(P(X=3) = \\binom{3}{3}(0,6)^3(0,4)^0 = 0,216\\). No son iguales. B) \\(P(X=1) = \\binom{3}{1}(0,6)^1(0,4)^2 = 3 \\cdot 0,6 \\cdot 0,16 = 0,288\\). \\(P(X=2) = \\binom{3}{2}(0,6)^2(0,4)^1 = 3 \\cdot 0,36 \\cdot 0,4 = 0,432\\). No son iguales. C) \\(P(X \\ge 0)\\) significa la probabilidad de obtener 0, 1, 2 o 3 goles. Estos son todos los resultados posibles del experimento binomial con \\(n=3\\). La suma de las probabilidades de todos los resultados posibles en un espacio muestral es siempre 1. Por lo tanto, esta afirmación es verdadera. D) La fórmula para \\(P(X=1)\\) es \\(\\binom{3}{1}(0,6)^1(0,4)^2\\), lo que la opción presenta de forma incompleta.",
+    "hints": [
+      "¿Qué significa \\(P(X \\ge 0)\\) en el contexto de la cantidad de goles en tres lanzamientos?",
+      "¿Cuál es la suma total de todas las probabilidades posibles en cualquier distribución de probabilidad?",
+      "Considera todos los valores que la variable aleatoria \\(X\\) puede tomar en este experimento. ¿Qué engloba la expresión \\(P(X \\ge 0)\\)?"
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "13",
+    "internalId": "q-1760927727480-0.6356769725973344",
+    "id": "q-ai-cat-1760927727480-3-1"
+  },
+  {
+    "text": "Suponga que un equipo de fútbol gana cuatro de cinco partidos cuando juegan como local, siguiendo una distribución binomial. Si juega 10 partidos como local durante el campeonato, la probabilidad que gane de 5 a 8 partidos es:",
+    "options": [
+      {
+        "text": "0,624190"
+      },
+      {
+        "text": "0,015698"
+      },
+      {
+        "text": "0,223678"
+      },
+      {
+        "text": "0,301357"
+      },
+      {
+        "text": "0,617806"
+      }
+    ],
+    "correct": 4,
+    "explanation": "Primero, identificamos los parámetros: \\(n=10\\) (partidos jugados) y \\(p=4/5 = 0,8\\) (probabilidad de ganar). Por lo tanto, \\(q=0,2\\). La pregunta pide \\(P(5 \\le X \\le 8)\\), lo que significa la suma de las probabilidades de ganar exactamente 5, 6, 7 u 8 partidos: \\(P(X=5) + P(X=6) + P(X=7) + P(X=8)\\). Cada una de estas probabilidades se calcula usando la fórmula binomial \\(P(X=k) = \\binom{n}{k} p^k q^{n-k}\\). Al sumar los resultados individuales (\\(P(X=5) \\approx 0,0264\\), \\(P(X=6) \\approx 0,0881\\), \\(P(X=7) \\approx 0,2013\\), \\(P(X=8) \\approx 0,3020\\)), obtenemos \\(0,0264 + 0,0881 + 0,2013 + 0,3020 \\approx 0,6178\\).",
+    "hints": [
+      "¿Cuáles son los parámetros \\(n\\) (número total de partidos) y \\(p\\) (probabilidad de ganar un partido) que se pueden inferir del enunciado?",
+      "¿Qué significa la expresión \"la probabilidad que gane de 5 a 8 partidos\" en términos de una suma de probabilidades individuales?",
+      "Escribe la fórmula binomial para cada valor de \\(k\\) (5, 6, 7 y 8) y luego suma los resultados obtenidos. Utiliza una calculadora si es necesario para los cálculos numéricos."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "23",
+    "internalId": "q-1760927727480-0.8663832240279682",
+    "id": "q-ai-cat-1760927727480-3-2"
+  },
+  {
+    "text": "La siguiente tabla representa una función de probabilidad binomial: <table><thead><tr><th>X</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead><tbody><tr><td>P(X)</td><td>0,0778</td><td>0,2592</td><td>0,3456</td><td>0,2304</td><td>0,0768</td><td>0,0102</td></tr></tbody></table> Considerando esta información, ¿cuál es la probabilidad de que \\(X \\le 3\\)?",
+    "options": [
+      {
+        "text": "0,9130"
+      },
+      {
+        "text": "0,3174"
+      },
+      {
+        "text": "0,2304"
+      },
+      {
+        "text": "0,3370"
+      },
+      {
+        "text": "0,2138"
+      }
+    ],
+    "correct": 0,
+    "explanation": "La expresión \\(P(X \\le 3)\\) significa la probabilidad de que la variable aleatoria \\(X\\) tome un valor de 3 o menos. Para obtener esta probabilidad a partir de la tabla, debemos sumar las probabilidades individuales de \\(X=0\\), \\(X=1\\), \\(X=2\\) y \\(X=3\\). Es decir, \\(P(X \\le 3) = P(X=0) + P(X=1) + P(X=2) + P(X=3)\\). Sumando los valores de la tabla: \\(0,0778 + 0,2592 + 0,3456 + 0,2304 = 0,9130\\).",
+    "hints": [
+      "¿Qué valores de \\(X\\) están incluidos en la condición \\(X \\le 3\\)?",
+      "Una vez que identifiques los valores de \\(X\\), ¿cómo se combinan las probabilidades de esos valores para obtener la probabilidad acumulada?",
+      "Suma directamente las probabilidades \\(P(X=0)\\), \\(P(X=1)\\), \\(P(X=2)\\) y \\(P(X=3)\\) de la tabla."
+    ],
+    "sourceFileName": "Text Input",
+    "originalQuestionNumber": "24",
+    "internalId": "q-1760927727480-0.29128722003769114",
+    "id": "q-ai-cat-1760927727480-3-3"
+  }
+];
+        const categories = [
+  {
+    "id": "ai-cat-1760927727480-0",
+    "title": "Distribución Binomial - Fundamentos y Parámetros",
+    "description": "<p>En esta categoría, exploraremos la <strong>Distribución Binomial</strong>, una herramienta fundamental para modelar experimentos con un número fijo de ensayos independientes, cada uno con solo dos resultados posibles: éxito o fracaso.</p><ul><li><strong>Parámetros Clave:</strong><ul><li><strong><code>n</code></strong>: El número total de ensayos.</li><li><strong><code>k</code></strong>: El número de éxitos deseados.</li><li><strong><code>p</code></strong>: La probabilidad de éxito en un solo ensayo.</li><li><strong><code>q</code></strong>: La probabilidad de fracaso en un solo ensayo, donde siempre se cumple que <strong><code>q = 1 - p</code></strong>.</li></ul></li><li><strong>Fórmula de la Probabilidad Binomial:</strong> La probabilidad de obtener exactamente <code>k</code> éxitos en <code>n</code> ensayos está dada por:<span></span>\\[P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\]<span></span></li><li>El término <span>\\(\\binom{n}{k}\\)</span> es el <strong>coeficiente binomial</strong>, que representa el número de formas de elegir <code>k</code> éxitos de <code>n</code> ensayos, y se calcula como:<span></span>\\[\\binom{n}{k} = \\frac{n!}{k!(n-k)!}\\]<span></span></li><li>Un caso especial importante es cuando <strong><code>p = 0,5</code></strong>, la distribución binomial es <strong>simétrica</strong>, lo que implica que <span>\\(P(X=k) = P(X=n-k)\\)</span>.</li></ul><p>Comprender estos parámetros y la fórmula es esencial para identificar cuándo aplicar la distribución binomial y cómo calcular las probabilidades asociadas.</p>",
+    "summaryKey": "ai-cat-1760927727480-0",
+    "problem_ids": [
+      "q-ai-cat-1760927727480-0-0",
+      "q-ai-cat-1760927727480-0-1",
+      "q-ai-cat-1760927727480-0-2",
+      "q-ai-cat-1760927727480-0-3"
+    ]
+  },
+  {
+    "id": "ai-cat-1760927727480-1",
+    "title": "Distribución Normal - Estandarización y Cálculo",
+    "description": "<p>Esta sección se centra en la <strong>Distribución Normal</strong>, una de las distribuciones de probabilidad más importantes, caracterizada por su forma de campana simétrica. Es fundamental para modelar muchos fenómenos naturales y sociales.</p><ul><li><strong>Parámetros Clave:</strong><ul><li><strong>\\(\\mu\\) (media):</strong> El centro de la distribución, donde se encuentra el valor más probable.</li><li><strong>\\(\\sigma\\) (desviación estándar):</strong> Una medida de la dispersión de los datos alrededor de la media.</li></ul></li><li><strong>Estandarización (Puntaje Z):</strong> Para calcular probabilidades con la distribución normal, a menudo se estandariza la variable aleatoria \\(X\\) a una <strong>Distribución Normal Estándar</strong> (con \\(\\mu = 0\\) y \\(\\sigma = 1\\)) utilizando el <strong>puntaje Z</strong>:<span></span>\\[Z = \\frac{X - \\mu}{\\sigma}\\]<span></span>El puntaje Z indica cuántas desviaciones estándar un valor \\(X\\) está por encima o por debajo de la media.</li><li><strong>Cálculo de Probabilidades:</strong> Una vez obtenido el puntaje Z, se utiliza una tabla de distribución normal estándar (Tabla Z) o software estadístico para encontrar las probabilidades asociadas.<ul><li><strong>Probabilidad acumulada:</strong> \\(P(X < x)\\) es equivalente a \\(P(Z < z)\\).</li><li><strong>Probabilidad de \"mayor que\":</strong> \\(P(X > x) = 1 - P(X < x)\\).</li><li><strong>Probabilidad en un intervalo:</strong> \\(P(a < X < b) = P(X < b) - P(X < a)\\).</li></ul></li><li><strong>Regla Empírica:</strong> Para distribuciones normales, aproximadamente el 68% de los datos caen dentro de \\(\\mu \\pm 1\\sigma\\), el 95% dentro de \\(\\mu \\pm 2\\sigma\\) y el 99.7% dentro de \\(\\mu \\pm 3\\sigma\\).</li></ul><p>Dominar la estandarización y el uso de la tabla Z es crucial para resolver problemas de probabilidad con la distribución normal.</p>",
+    "summaryKey": "ai-cat-1760927727480-1",
+    "problem_ids": [
+      "q-ai-cat-1760927727480-1-0",
+      "q-ai-cat-1760927727480-1-1",
+      "q-ai-cat-1760927727480-1-2",
+      "q-ai-cat-1760927727480-1-3"
+    ]
+  },
+  {
+    "id": "ai-cat-1760927727480-2",
+    "title": "Aplicación de la Distribución Binomial",
+    "description": "<p>Esta categoría aplica los fundamentos de la <strong>Distribución Binomial</strong> para resolver problemas prácticos. Aquí consolidaremos la habilidad de identificar correctamente los parámetros \\(n\\) y \\(p\\), y utilizaremos la fórmula de probabilidad para calcular la probabilidad de un número específico de éxitos.</p><ul><li><strong>Identificación de un Escenario Binomial:</strong> Asegúrate de que el problema cumpla con las siguientes características:<ul><li>Un número fijo de ensayos (\\(n\\)).</li><li>Cada ensayo es independiente de los demás.</li><li>Solo dos resultados posibles por ensayo (éxito o fracaso).</li><li>La probabilidad de éxito (\\(p\\)) es constante para cada ensayo.</li></ul></li><li><strong>Fórmula de Probabilidad:</strong> Recuerda y aplica correctamente la fórmula para calcular la probabilidad de obtener exactamente \\(k\\) éxitos:<span></span>\\[P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot q^{n-k}\\]<span></span></li><li><strong>Cálculo del Coeficiente Binomial:</strong> No olvides que \\(\\binom{n}{k} = \\frac{n!}{k!(n-k)!}\\).</li><li><strong>Casos Especiales:</strong> Si \\(p=0,5\\), la fórmula se simplifica a \\(P(X=k) = \\binom{n}{k} \\cdot (0,5)^n\\).</li><li><strong>Cálculos Numéricos:</strong> Para obtener resultados finales, es esencial realizar los cálculos aritméticos con precisión, incluyendo el coeficiente binomial y las potencias de \\(p\\) y \\(q\\).</li></ul><p>La práctica en esta sección te permitirá aplicar la teoría a situaciones concretas y obtener las probabilidades requeridas.</p>",
+    "summaryKey": "ai-cat-1760927727480-2",
+    "problem_ids": [
+      "q-ai-cat-1760927727480-2-0",
+      "q-ai-cat-1760927727480-2-1",
+      "q-ai-cat-1760927727480-2-2",
+      "q-ai-cat-1760927727480-2-3"
+    ]
+  },
+  {
+    "id": "ai-cat-1760927727480-3",
+    "title": "Interpretación de Distribuciones",
+    "description": "<p>Esta categoría evalúa tu capacidad para interpretar la información proporcionada por las <strong>distribuciones de probabilidad</strong>, tanto a partir de tablas como de las propiedades inherentes a las distribuciones binomial y normal.</p><ul><li><strong>Simetría de la Distribución Binomial:</strong> Cuando la probabilidad de éxito \\(p = 0,5\\), la distribución binomial es perfectamente simétrica. Esto implica que la probabilidad de \\(k\\) éxitos es igual a la probabilidad de \\(n-k\\) éxitos, es decir, \\(P(X=k) = P(X=n-k)\\). Además, tener \\(k\\) éxitos es equivalente a tener \\(n-k\\) fracasos.</li><li><strong>Espacio Muestral y Suma de Probabilidades:</strong> La suma de las probabilidades de todos los resultados posibles en el espacio muestral de cualquier variable aleatoria discreta siempre debe ser 1. Por ejemplo, si \\(X\\) puede tomar valores de 0 a \\(n\\), entonces \\(P(X \\ge 0) = \\sum_{i=0}^{n} P(X=i) = 1\\).</li><li><strong>Probabilidades Acumuladas:</strong> La probabilidad de que \\(X\\) sea menor o igual a un valor \\(k\\) (\\(P(X \\le k)\\)) se calcula sumando las probabilidades individuales de \\(X=0, X=1, \\ldots, X=k\\).</li><li><strong>Interpretación de Rangos:</strong> Cuando se solicita la probabilidad de un rango de valores (ej. \"de \\(a\\) a \\(b\\)\" o \"entre \\(a\\) y \\(b\\)\"), se deben sumar las probabilidades de cada valor discreto dentro de ese rango, o usar la diferencia de probabilidades acumuladas para distribuciones continuas.</li></ul><p>Desarrollar una fuerte intuición sobre estas propiedades te permitirá verificar la coherencia de tus cálculos y comprender mejor el significado de los resultados probabilísticos.</p>",
+    "summaryKey": "ai-cat-1760927727480-3",
+    "problem_ids": [
+      "q-ai-cat-1760927727480-3-0",
+      "q-ai-cat-1760927727480-3-1",
+      "q-ai-cat-1760927727480-3-2",
+      "q-ai-cat-1760927727480-3-3"
+    ]
+  }
+];
+
+        const problemsById = {};
+        allProblemsData.forEach(p => { problemsById[p.id] = p; });
+        
+        let currentQuizProblems = [];
+        let currentCategory = null;
+        let completedCategories = JSON.parse(localStorage.getItem('completedQuizCategories')) || {};
+        let currentProblemIndex = 0;
+        let score = 0;
+        
+        const categorySelectionScreen = document.getElementById('category-selection-screen');
+        const categoryListEl = document.getElementById('category-list');
+        const overallProgressContainer = document.getElementById('overall-progress-container');
+        const overallScoreEl = document.getElementById('overall-score');
+        const showFinalResultsBtn = document.getElementById('show-final-results-btn');
+        const quizWrapperEl = document.getElementById('quiz-wrapper');
+        const summaryContainerEl = document.getElementById('summary-container');
+        const summaryContinueBtn = document.getElementById('summary-continue-btn');
+        const quizContainerEl = document.getElementById('quiz-container');
+        const headerEl = document.getElementById('problem-header');
+        const questionEl = document.getElementById('question-container');
+        const graphEl = document.getElementById('graph-container');
+        const optionsEl = document.getElementById('options-container');
+        const hintsEl = document.getElementById('hints-container');
+        const feedbackEl = document.getElementById('feedback-container');
+        const nextButton = document.getElementById('next-button');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreCounterEl = document.getElementById('score-counter');
+        const finalScreenEl = document.getElementById('final-screen');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+
+        function renderCategoryScreen() {
+            categoryListEl.innerHTML = '';
+            let totalCompleted = 0;
+            let totalPossibleScore = 0;
+            let totalUserScore = 0;
+
+            categories.forEach(cat => {
+                const li = document.createElement('li');
+                li.className = 'category-item';
+                li.dataset.categoryId = cat.id;
+                
+                const catProgress = completedCategories[cat.id];
+                let progressHTML = '';
+                if(catProgress) {
+                    li.classList.add('completed');
+                    if (catProgress.total > 0) {
+                        progressHTML = `<div class="progress-info">Completado: ${catProgress.score}/${catProgress.total}</div>`;
+                    }
+                    totalCompleted++;
+                    totalUserScore += catProgress.score;
+                    totalPossibleScore += cat.problem_ids.length;
+                }
+
+                li.innerHTML = `<h3>${cat.title}</h3><p>${cat.description.replace(/<[^>]*>?/gm, '').substring(0, 100)}...</p>${progressHTML}`;
+                li.onclick = () => {
+                    if (!li.classList.contains('completed')) {
+                        startCategory(cat.id);
+                    }
+                };
+                categoryListEl.appendChild(li);
+            });
+
+            if (Object.keys(completedCategories).length > 0) {
+                overallProgressContainer.classList.remove('hidden');
+                overallScoreEl.textContent = `Puntaje total: ${totalUserScore} de ${totalPossibleScore} correctas. Secciones completadas: ${totalCompleted} de ${categories.length}.`;
+            } else {
+                 overallProgressContainer.classList.add('hidden');
+            }
+
+            if (totalCompleted === categories.length && categories.length > 0) {
+                showFinalResultsBtn.classList.remove('hidden');
+            } else {
+                showFinalResultsBtn.classList.add('hidden');
+            }
+
+            quizWrapperEl.classList.add('hidden');
+            categorySelectionScreen.classList.remove('hidden');
+        }
+
+        function startCategory(categoryId) {
+            currentCategory = categories.find(c => c.id === categoryId);
+            if (!currentCategory) return;
+            
+            categorySelectionScreen.classList.add('hidden');
+            quizWrapperEl.classList.remove('hidden');
+
+            currentQuizProblems = currentCategory.problem_ids.map(id => problemsById[id]);
+            currentProblemIndex = 0;
+            score = 0;
+            
+            showSummary(currentCategory.id);
+        }
+
+        function showSummary(summaryKey) {
+            const summary = summaries[summaryKey];
+            if (!summary) {
+                 summaryContinueBtn.onclick(); return;
+            }
+            
+            const summaryTitleEl = document.getElementById('summary-title');
+            const keyConceptsEl = document.getElementById('summary-key-concepts');
+            const tipsListEl = document.getElementById('summary-tips-list');
+    
+            summaryTitleEl.textContent = `Preparación para: ${summary.title}`;
+            keyConceptsEl.innerHTML = summary.key_concepts_html;
+            
+            tipsListEl.innerHTML = '';
+            summary.tips.forEach(tip => {
+                const li = document.createElement('li');
+                li.textContent = tip;
+                tipsListEl.appendChild(li);
+            });
+            
+            renderMath();
+            quizContainerEl.classList.add('hidden');
+            finalScreenEl.classList.add('hidden');
+            summaryContainerEl.classList.remove('hidden');
+        }
+
+        summaryContinueBtn.onclick = () => {
+            summaryContainerEl.classList.add('hidden');
+            if (currentQuizProblems && currentQuizProblems.length > 0) {
+                quizContainerEl.classList.remove('hidden');
+                renderProblem(currentProblemIndex);
+            } else {
+                endOfCategory();
+            }
+        };
+        
+        function renderProblem(index) {
+            optionsEl.innerHTML = '';
+            hintsEl.innerHTML = '';
+            feedbackEl.style.display = 'none';
+            nextButton.classList.remove('visible');
+            graphEl.innerHTML = '';
+            optionsEl.className = '';
+
+            const problem = currentQuizProblems[index];
+            if (!problem) {
+                console.error("Could not find problem for index:", index, "in category:", currentCategory.title);
+                questionEl.innerHTML = "Error: No se pudo cargar la pregunta. Verifique que los datos sean correctos.";
+                return;
+            }
+
+            headerEl.textContent = `Pregunta ${index + 1} de ${currentQuizProblems.length}`;
+            questionEl.innerHTML = problem.text;
+            progressBar.style.width = `${((index) / currentQuizProblems.length) * 100}%`;
+            scoreCounterEl.textContent = `✅ Puntos: ${score}`;
+            
+            if (problem.diagram) {
+                graphEl.style.display = 'block';
+                graphEl.innerHTML = renderDiagram(problem.diagram);
+            } else {
+                graphEl.style.display = 'none';
+            }
+            
+            const optionsHaveDiagrams = problem.options.some(opt => opt.diagram);
+
+            if (optionsHaveDiagrams) {
+                 optionsEl.className = 'options-grid-with-graphs';
+                 problem.options.forEach((opt, i) => createOptionBlock(opt, i));
+            } else {
+                 problem.options.forEach((opt, i) => createOptionButton(opt, i));
+            }
+
+            if (problem.hints && problem.hints.length > 0) {
+                problem.hints.forEach((hint, i) => {
+                    const button = document.createElement('button');
+                    button.className = 'hint-button';
+                    button.textContent = `💡 Revelar Pista ${i + 1}`;
+                    button.dataset.hintIndex = i;
+                    if (i > 0) {
+                        button.disabled = true;
+                    }
+                    button.onclick = (e) => {
+                        const clickedButton = e.currentTarget;
+                        const hintContent = document.createElement('div');
+                        hintContent.className = 'hint-content';
+                        hintContent.innerHTML = hint;
+                        clickedButton.replaceWith(hintContent);
+                        
+                        const nextHintButton = hintsEl.querySelector('.hint-button');
+                        if (nextHintButton) {
+                            nextHintButton.disabled = false;
+                        }
+                        renderMath();
+                    };
+                    hintsEl.appendChild(button);
+                });
+            }
+
+            renderMath();
+        }
+        
+        function createOptionButton(option, index) {
+            const button = document.createElement('button');
+            button.className = 'option-button';
+            button.dataset.index = index;
+            button.innerHTML = `<span class="label">${String.fromCharCode(65 + index)})</span> <span class="value">${option.text || ''}</span>`;
+            button.onclick = handleOptionClick;
+            optionsEl.appendChild(button);
+        }
+        
+        function createOptionBlock(option, index) {
+            const optionBlock = document.createElement('div');
+            optionBlock.className = 'option-block-graph';
+            optionBlock.dataset.index = index;
+            optionBlock.onclick = handleOptionClick;
+            let diagramHTML = option.diagram ? `<div class="option-graph-canvas-container">${renderDiagram(option.diagram)}</div>` : '';
+            optionBlock.innerHTML = `<div class="label">${String.fromCharCode(65 + index)}) ${option.text || ''}</div> ${diagramHTML}`;
+            optionsEl.appendChild(optionBlock);
+        }
+
+        function handleOptionClick(event) {
+            const problem = currentQuizProblems[currentProblemIndex];
+            const selectedIndex = parseInt(event.currentTarget.dataset.index, 10);
+            const correctIndex = problem.correct;
+            
+            const correctButton = document.querySelector(`[data-index="${correctIndex}"]`);
+            if (correctButton) correctButton.classList.add('correct');
+            
+            let isAnswerCorrect = false;
+            const selectedButton = event.currentTarget;
+            if (selectedIndex === correctIndex) {
+                score++;
+                isAnswerCorrect = true;
+            } else {
+                selectedButton.classList.add('incorrect');
+            }
+            
+            scoreCounterEl.textContent = `✅ Puntos: ${score}`;
+            document.querySelectorAll('.option-button, .option-block-graph').forEach(btn => { btn.classList.add('disabled'); btn.onclick = null; });
+            progressBar.style.width = `${((currentProblemIndex + 1) / currentQuizProblems.length) * 100}%`;
+            
+            feedbackEl.className = isAnswerCorrect ? 'feedback-container correct' : 'feedback-container incorrect';
+            const feedbackTitle = isAnswerCorrect ? `<div id="feedback-title">${icons.check} Correcto</div>` : `<div id="feedback-title">${icons.x} Incorrecto</div>`;
+            feedbackEl.innerHTML = `${feedbackTitle}${problem.explanation}`;
+            
+            renderMath();
+            feedbackEl.style.display = 'block';
+            if (currentProblemIndex < currentQuizProblems.length - 1) { nextButton.textContent = 'Siguiente →'; } 
+            else { nextButton.textContent = 'Finalizar Sección'; }
+            nextButton.classList.add('visible');
+        }
+
+        nextButton.onclick = () => {
+            currentProblemIndex++;
+            if (currentProblemIndex < currentQuizProblems.length) {
+                renderProblem(currentProblemIndex);
+            } else {
+                endOfCategory();
+            }
+        };
+        
+        function endOfCategory() {
+            completedCategories[currentCategory.id] = {
+                score: score,
+                total: currentQuizProblems.length
+            };
+            localStorage.setItem('completedQuizCategories', JSON.stringify(completedCategories));
+            
+            quizContainerEl.classList.add('hidden');
+            finalScreenEl.classList.remove('hidden');
+
+            const percentage = currentQuizProblems.length > 0 ? Math.round((score / currentQuizProblems.length) * 100) : 100;
+            document.getElementById('final-title').textContent = `Sección Completada: ${currentCategory.title}`;
+            document.getElementById('final-message').textContent = currentQuizProblems.length > 0 ? `¡Gran trabajo! Has completado esta sección.` : `¡Concepto explorado! Ahora puedes continuar con la siguiente sección.`;
+            document.getElementById('final-score').textContent = currentQuizProblems.length > 0 ? `${score} / ${currentQuizProblems.length}` : '✔';
+            const finalPercentageEl = document.getElementById('final-percentage');
+            if (currentQuizProblems.length > 0) {
+                finalPercentageEl.textContent = `(${percentage}%)`;
+                finalPercentageEl.style.color = percentage >= 60 ? 'var(--success-color)' : 'var(--danger-color)';
+            } else {
+                finalPercentageEl.textContent = '';
+            }
+            backToMenuBtn.textContent = 'Volver al Menú';
+            backToMenuBtn.onclick = () => {
+                finalScreenEl.classList.add('hidden');
+                renderCategoryScreen();
+            };
+        }
+        
+        showFinalResultsBtn.onclick = () => {
+            categorySelectionScreen.classList.add('hidden');
+            quizWrapperEl.classList.remove('hidden');
+
+            summaryContainerEl.classList.add('hidden');
+            quizContainerEl.classList.add('hidden');
+            finalScreenEl.classList.remove('hidden');
+
+            let totalScore = 0;
+            let totalProblems = 0;
+            Object.values(completedCategories).forEach(cat => {
+                totalScore += cat.score;
+                if (cat.total > 0) {
+                    totalProblems += cat.total;
+                }
+            });
+
+            const percentage = totalProblems > 0 ? Math.round((totalScore / totalProblems) * 100) : 0;
+            document.getElementById('final-title').textContent = '¡Resumen Final del Desafío!';
+            document.getElementById('final-message').textContent = '¡Felicidades! Has completado todos los temas. Este es tu rendimiento general.';
+            document.getElementById('final-score').textContent = `${totalScore} / ${totalProblems}`;
+            const finalPercentageEl = document.getElementById('final-percentage');
+            finalPercentageEl.textContent = `(${percentage}%)`;
+            finalPercentageEl.style.color = percentage >= 60 ? 'var(--success-color)' : 'var(--danger-color)';
+            
+            backToMenuBtn.textContent = 'Reiniciar Desafío';
+            backToMenuBtn.onclick = () => {
+                localStorage.removeItem('completedQuizCategories');
+                window.location.reload();
+            };
+        };
+        
+        renderCategoryScreen();
+        renderMath();
+    });
+    </script>
+</body>
+</html>
+  
